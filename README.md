@@ -10,14 +10,14 @@ You will learn how to use and configure LibreLane, debug your design, integrate 
 
 ## Prerequisites
 
-> [!NOTE]
-> The HeiChips VM has Nix already pre-installed.
+If you haven't installed Nix yet, please follow LibreLane's documentation: [Nix-based Installation](https://librelane.readthedocs.io/en/latest/installation/nix_installation/index.html).
 
-If you haven't installed Nix yet, please do so using LibreLane's documentation: [Nix-based Installation](https://librelane.readthedocs.io/en/latest/getting_started/common/nix_installation/index.html). 
-
-Now you simply need to execute `nix-shell` at the root directory of this repository to enable all of the required tools. This has to be done each time you open a new shell.
+Now, simply execute `nix-shell` from the root directory of this repository to enable all of the required tools. This must be done every time you open a new shell.
 
 The Nix flake of this repository provides the `dev` branch of LibreLane.
+
+> [!NOTE]
+> The HeiChips VM has Nix already pre-installed.
 
 ## Exercises
 

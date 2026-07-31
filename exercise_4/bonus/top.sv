@@ -27,7 +27,7 @@ module top (
         	end
 	end
 	
-	logic mem_din;
+	logic [7:0] mem_din;
 	always_comb begin
 	    case (mem_addr[1:0])
 	        2'b00: mem_din = 8'hDE;

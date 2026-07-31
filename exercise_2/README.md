@@ -1,12 +1,12 @@
 # Exercise 2 - All About Configuration Variables
 
-For more advanced designs you will need to customize the flow and step configuration variables in LibreLane. 
+For more advanced designs, you will need to customize the flow and individual steps in LibreLane. 
 
-In this exercise you will learn how to change flow and step configuration variables in LibreLane. 
+In this exercise, you will learn how to change flow and step configuration variables. 
 
 ## 2.1 - Set the Die Area
 
-By default, LibreLane will automatically size the die area based on your design.
+By default, LibreLane automatically sizes the die area based on your design.
 
 This is done as part of the [`OpenROAD.Floorplan`](https://librelane.readthedocs.io/en/latest/reference/step_config_vars.html#floorplan-initialization) step when `FP_SIZING: "relative"`.
 
@@ -19,7 +19,7 @@ However, there's another knob we can turn: density!
 Of course, this doesn't change the global density, which is specified by our die area and the number of cells.
 
 Instead, the target density specifies the placement density of the cells. Imagine a large die area with a high target density.
-You will get a lonely lump of standard cells somewhere in the center of your die area.
+You will end up with a lonely lump of standard cells somewhere in the center of your die area.
 
 How sad. Let's try that!
 
@@ -31,18 +31,18 @@ DIE_AREA: [0, 0, 150, 150]
 PL_TARGET_DENSITY_PCT: 80
 ```
 
-And now, run the full flow.
+Now, run the full flow as you did in exercise 1.
 
 And here's our lonely lump of standard cells:
 
 ![OpenROAD GUI](img/openroad_1.png)
 
-Normally you want the smallest possible area with the highest possible density.
-What prevents you in from cranking up the target density to 100%? Once the target density reaches a certain value, OpenROAD will have trouble routing your design - because everything is so dense!
+Typically, you want the smallest possible area with the highest possible density.
+What's stopping you from cranking up the target density to 100%? Once the target density reaches a certain value, OpenROAD will have trouble routing your design - because everything is so dense!
 
-**Your task** is now to find the smallest possible area with the highest target density.
+**Your task** is to find the smallest possible area with the highest target density.
 
-Don't worry, if the target density is too low to fit the design into the given area, OpenROAD will tell you. And if it is too high, then routing will fail. It's a balancing act.
+Don't worry. If the target density is too low to fit the design into the given area, OpenROAD will tell you. And if it's too high, routing will fail. It's a balancing act.
 
 ### 2.2 - Custom Pin Placement
 
@@ -56,7 +56,7 @@ OpenROAD.IOPlacement
 OpenROAD.GlobalPlacement
 ```
 
-First, the standard cells are placed without considering the I/O pins. In the next step, the I/O pins are placed as close to the cells where they are needed. In the third step, the cell placement is optimized once more by placing the cells again, now taking into account the placed pins.
+First, the standard cells are placed without considering the I/O pins. In the next step, the I/O pins are placed as close as possible to the cells where they are needed. In the third step, the cell placement is optimized once more by placing the cells again, now taking into account the placed pins.
 However, often you can't freely decide where the pins should be placed.
 
 How about we want all input pins on the left side of your macro, and all output pins on the right side?
@@ -67,16 +67,44 @@ What's a pin placement configuration file? Find out here: [Pin Placer Configurat
 
 Create a new file called `pins.cfg` and add the necessary entries to place all input pins on the left side of your macro, and all output pins on the right side. You may need to take a look at `src/project.sv`.
 
+<details>
+<summary>Show Solution</summary>
+
+Are you really sure? Have you tried it yourself? I don't make these exercises just for fun...
+
+<details>
+<summary>Show Solution!</summary>
+
+`pins.cfg`
+
+```yaml
+# W
+
+ena
+clk
+rst_n
+ui_in\[.*\]
+uio_in\[.*\]
+uio_oe\[.*\]
+
+# E
+
+uo_out\[.*\]
+uio_out\[.*\]
+```
+
+</details>
+</details>
+
 Finally, set the `FP_PIN_ORDER_CFG` variable to point to your pin placement configuration file:
 
 ```yaml
 FP_PIN_ORDER_CFG: dir::pins.cfg
 ```
 
-Run the flow, and the result should look like this (maybe you have a different die area):
+Run the flow, and the result should look like this (maybe you have chosen a different die area):
 
 ![OpenROAD GUI](img/openroad_2.png)
-
 
 ### 2.3 - Use a DEF Template
 
@@ -89,7 +117,7 @@ You can find the DEF templates provided by Tiny Tapeout in the `def/` folder. We
 
 The [Odb.ApplyDEFTemplate](https://librelane.readthedocs.io/en/latest/reference/step_config_vars.html#apply-def-template) step in LibreLane expects the `FP_DEF_TEMPLATE` variable to point to the DEF template you want to use.
 
-Let's give this a try:
+Undo all the changes you've made to the configuration so far. Now, let's give this a try:
 
 ```yaml
 FP_SIZING: absolute
@@ -97,11 +125,11 @@ DIE_AREA: [0, 0, 202.08, 154.98]
 FP_DEF_TEMPLATE: dir::def/tt_block_1x1_pgvdd.def
 ```
 
-Why do we have to specify the die area? Isn't that part of the DEF template? It is, and LibreLane will throw an error if it does not match up.
+Why do we have to specify the die area? Isn't that part of the DEF template? It is, and LibreLane will throw an error if they do not match.
 
 ![OpenROAD GUI](img/openroad_3.png)
 
-Nice! And ready for submission to Tiny Taepout.
+Nice! And ready for submission to Tiny Tapeout.
 
 Now, try some of the other DEF templates. But don't forget to adjust the die area!
 
@@ -118,7 +146,7 @@ There are two ways to do that:
 The former will prevent any placement sites (standard cell rows) from being generated - no cells will every be placed there.
 The latter will only prevent cells being placed during initial placement. Later, during buffer or antenna insertion, standard cells are allowed the be placed in this area.
 
-For starters, try (I'm still using `tt_block_1x1_pgvdd.def`):
+For starters, try the following (I'm still using `tt_block_1x1_pgvdd.def`):
 
 ```yaml
 FP_OBSTRUCTIONS:

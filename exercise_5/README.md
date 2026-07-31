@@ -1,12 +1,12 @@
 # Exercise 5 - The LibreLane API
 
-LibreLane gives you access to its Python API, which allows you to programmatically configure flows and steps as well as create custom flows and steps.
+LibreLane gives you access to its Python API, which allows you to programmatically configure flows and steps, as well as create custom flows and steps.
 
 ## 5.1 - Using the API
 
 How do we use the API? As always, there is some documentation: [`librelane` API](https://librelane.readthedocs.io/en/latest/reference/api/index.html).
 
-That's quite a lot at once! Let's start with something already prepared.
+That's quite a lot at once! Let's start with something that has already been prepared.
 
 Take a look at `flow.py` in this exercise. It is a Python script that uses the LibreLane API to start the Classic flow - just like we did before!
 
@@ -45,12 +45,12 @@ class HeiChipsFlow(Classic):
 Now we can simply choose to use the HeiChipsFlow:
 
 ```Python
-	flow = HeiChipsFlow(
-		flow_cfg,
-		design_dir = ".",
-		pdk_root   = None,
-		pdk        = "ihp-sg13g2",
-	)
+    flow = HeiChipsFlow(
+        flow_cfg,
+        design_dir = ".",
+        pdk_root   = None,
+        pdk        = "ihp-sg13g2",
+    )
 ```
 
 And nothing changes. Don't believe me? Try it yourself:

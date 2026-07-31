@@ -1,14 +1,14 @@
 # Exercise 3 - Controlling the Flow
 
-For small designs, it might be fine to always re-run the entire flow from start to finish during debugging.
+For small designs, it may be fine to always re-run the entire flow from start to finish during debugging.
 
-For large designs with long iteration times, however, this can become annoying. Wouldn't it be nice if you could start another flow immediately after synthesis? Or only run up to a certain step because everything that follows is not yet important?
+For large designs with long iteration times, however, this can become annoying. Wouldn't it be nice if you could start another flow immediately after synthesis? Or only run up to a certain step, since everything that follows is not yet relevant?
 
 In this exercise, you will learn exactly how to do this.
 
 ## 3.1 - Run To a Step
 
-The `Classic` flow is a so-called `SequentialFlow` that consists of a [number of steps](https://github.com/librelane/librelane/blob/d96f32212d025acd1d7acf01f395951cf3d4aa12/librelane/flows/classic.py#L40).
+The `Classic` flow is a so-called `SequentialFlow` consisting of a [number of steps](https://github.com/librelane/librelane/blob/d96f32212d025acd1d7acf01f395951cf3d4aa12/librelane/flows/classic.py#L40).
 
 Let's say we only want to run up to `Yosys.Synthesis` as we're still debugging some issues there.
 
@@ -37,7 +37,7 @@ It should look something like this:
 
 ![OpenROAD GUI](img/openroad_1.png)
 
-It almost feels organic, like a snake? That's because the design is a long shift-register, basically one long chain of flip-flops. At the `OpenROAD.GlobalPlacement` the instances are all placed - roughly - however the standard cells are not yet snapped into the standard cell grid. That's what `OpenROAD.DetailedPlacement` does.
+It almost looks organic, like a snake? This is because the design is a long shift register, basically one long chain of flip-flops. The `OpenROAD.GlobalPlacement` step uses an electrostatic placer to place the standard cell instances, however, the standard cells are not yet snapped into the standard cell grid. That's what `OpenROAD.DetailedPlacement` does.
 
 So, let's see how we can run from `OpenROAD.GlobalPlacement` to `OpenROAD.DetailedPlacement`.
 
@@ -62,6 +62,8 @@ Or in short:
 ```
 librelane --pdk ihp-sg13g2 config.yaml --last-run -F OpenROAD.GlobalPlacement -i runs/<time_stamp>/28-openroad-globalplacement/state_in.json
 ```
+
+Please note that you need to replace `<time_stamp>` with the correct timestamp.
 
 > [!TIP]
 > Take a look at `state_in.json`, if you're interested in what a state consists of. (It is basically a mapping from `DesignFormat` to the file on disk, plus the current metrics.)

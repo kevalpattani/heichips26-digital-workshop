@@ -1,8 +1,8 @@
 # Exercise 4 - Using Macros
 
-Hard macros are pre-implemented IPs with a dedicated function that you can use in your design. You can implement your own macros, or use the ones provided by the PDK such as IO cells, SRAM macros, analog IPs maybe, etc.
+Hard macros are pre-implemented IPs with dedicated functions that you can use in your designs. You can implement your own macros, or use the ones provided by the PDK such as I/O cells, SRAM macros, analog IPs, etc.
 
-This exercise shows you how to create your own macro and subsequently use it in another design.
+This exercise will show you how to create your own macro and subsequently use it in another design.
 
 ## 4.1 - Creating a Macro
 
@@ -12,12 +12,12 @@ Change your current working directory to `counter_8bit`:
 cd counter_8bit
 ```
 
-First we need to decide on an integration method for the macro.
+The first thing we need to do is decide on an integration method for the macro.
 We need to ensure that we can connect the macro to the top-level PDN (Power Distribution Network). As we have only a single voltage domain this should be quite simple: we only have to care for the VPWR and VGND pins.
 
-The IHP Open PDK has five metal layers dedicated for routing (Metal1-Metal5) and two top metal layers (TopMetal1 and TopMetal2).
+The IHP Open PDK (ihp-sg13g2) has five metal layers dedicated for routing (Metal1-Metal5) and two top metal layers (TopMetal1 and TopMetal2).
 
-By default LibreLane will create horizontal power straps using TopMetal1 and vertical power straps using TopMetal2. You can see them here in blue and red:
+By default, LibreLane creates horizontal power straps using TopMetal1 and vertical power straps using TopMetal2. You can see these in blue and red here:
 
 ![OpenROAD GUI](img/openroad_1.png)
 
@@ -27,7 +27,7 @@ To integrate the macro into a top-level design we need to choose one of several 
 
 **Ring Method**: This method creates a power ring around your macro consisting of TopMetal1 and TopMetal2. With this method you don't loose any metal layers in your macro, however, it takes more area to implement the ring method.
 
-You need to choose one of the two methods. 3... 2... 1... okay and off you go.
+You need to choose one of the two methods. 3... 2... 1... okay, and off you go!
 
 If you chose the hierarchical method you need to restrict the maximum routing layer to TopMetal1 and set the PDN to only use a single layer (TopMetal1).
 
@@ -52,7 +52,10 @@ librelane --pdk ihp-sg13g2 config.yaml
 
 Great! Once that is done copy the `final/` directory with all its contents from the last run directory (`runs/<timestamp>/final/`) into the `counter_8bit` folder (`counter_8bit/final/`).
 
-You've created your first macro.
+> [!TIP]
+> You can use LibreLane's `--save-views-to` argument to automatically copy the `final/` directory.
+
+You've created your first macro 🙌
 
 ## 4.2 - Integrating a Macro
 
@@ -108,7 +111,10 @@ PDN_MACRO_CONNECTIONS:
   - "counter_3 VPWR VGND VPWR VGND"
 ```
 
-If you run the flow now, you will probably get an error during PDN generation. The issue is that the pitch between the PDN straps at the top-level is too large to reliable connect the macros.
+> [!TIP]
+> An alternative method of making the power connections is to use `USE_POWER_PINS` in the RTL.
+
+If you run the flow now, you will probably get an error during PDN generation. The issue is that the pitch between the PDN straps at the top-level is too large to reliable connect to all the macros.
 
 Therefore, we simply reduce the PDN pitch:
 
@@ -117,7 +123,8 @@ FP_PDN_VPITCH: 20
 FP_PDN_HPITCH: 20
 ```
 
-Other noteworthy variables are `FP_PDN_VWIDTH`/`FP_PDN_HWIDTH` and `FP_PDN_VSPACING`/`FP_PDN_HSPACING`.
+> [!NOTE]
+> Other noteworthy variables are `FP_PDN_VWIDTH`/`FP_PDN_HWIDTH` and `FP_PDN_VSPACING`/`FP_PDN_HSPACING`.
 
 Now, let's run the flow at the top-level (in `exercise_4/`):
 
@@ -133,16 +140,25 @@ LibreLane should complete successfully and you should be presented with one of t
 
 ## Bonus - IHP SRAM
 
-As a bonus task, you can try to integrate an SRAM macro from the IHP PDK. Why use an SRAM? For large memories, SRAM is much more efficient area-wise than a memory made of flip-flops or latches.
+As a bonus task, you can try integrating an SRAM macro from the IHP PDK. Why use an SRAM? For large memories, SRAM is much more efficient area-wise than a memory made of flip-flops or latches.
 
-> [!NOTE]  
+> [!NOTE]
 > Remember, the PDK is stored under `~/.ciel`. Take a look at the `libs.ref/sg13g2_sram/` directory for an overview of the available SRAM macros.
 
-Here I chose the [RM_IHPSG13_1P_1024x8_c2_bm_bist](https://github.com/IHP-GmbH/IHP-Open-PDK/blob/main/ihp-sg13g2/libs.ref/sg13g2_sram/doc/RM_IHPSG13_1P_1024x8_c2_bm_bist.txt), an 8-bit wide SRAM with 1024 words, for you.
+Here I chose the [RM_IHPSG13_1P_1024x8_c2_bm_bist](https://github.com/IHP-GmbH/IHP-Open-PDK/blob/main/ihp-sg13g2/libs.ref/sg13g2_sram/doc/RM_IHPSG13_1P_1024x8_c2_bm_bist.txt) for you, an 8-bit wide SRAM with 1024 words.
+
+> [!NOTE]
+> The SRAM macros are not currently fully Magic or KLayout DRC clean. Nevertheless, IHP will manufacture them and they are functional.
+> If you'd like to, you can skip DRC: `librelane --pdk ihp-sg13g2 config.yaml --skip Magic.DRC --skip KLayout.DRC`
 
 You can use this configuration as reference:
 
 ```
+# Use FUNCTIONAL model of SRAM
+# (else yosys throws an error)
+VERILOG_DEFINES:
+- FUNCTIONAL
+
 MACROS:
   RM_IHPSG13_1P_1024x8_c2_bm_bist:
     gds:
@@ -168,4 +184,16 @@ PDN_MACRO_CONNECTIONS:
   - "top.sram VPWR VGND VDDARRAY! VSS!"
 ```
 
+You will need to add a custom PDN connect to the PDN config:
+
+```tcl
+# Connect SRAM Metal4 to PDN_VERTICAL_LAYER
+add_pdn_connect \
+    -grid macro \
+    -layers "$::env(PDN_VERTICAL_LAYER) Metal4"
+```
+
 Good luck!
+
+> [!TIP]
+> You can find the solution under `exercise4/bonus/`.

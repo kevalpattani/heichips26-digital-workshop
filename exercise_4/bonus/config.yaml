@@ -1,0 +1,41 @@
+# LibreLane configuration file
+
+DESIGN_NAME: top
+VERILOG_FILES: dir::top.sv
+CLOCK_PORT: clk_i
+CLOCK_PERIOD: 10 # 10ns = 100MHz
+
+FP_SIZING: absolute
+DIE_AREA: [0, 0, 450, 250]
+PL_TARGET_DENSITY_PCT: 60
+
+# Use FUNCTIONAL model of SRAM
+# (else yosys throws an error)
+VERILOG_DEFINES:
+- FUNCTIONAL
+
+MACROS:
+  RM_IHPSG13_1P_1024x8_c2_bm_bist:
+    gds:
+      - pdk_dir::libs.ref/sg13g2_sram/gds/RM_IHPSG13_1P_1024x8_c2_bm_bist.gds
+    lef:
+      - pdk_dir::libs.ref/sg13g2_sram/lef/RM_IHPSG13_1P_1024x8_c2_bm_bist.lef
+    nl:
+      - pdk_dir::libs.ref/sg13g2_sram/verilog/RM_IHPSG13_1P_1024x8_c2_bm_bist.v
+    lib:
+      nom_typ_1p20V_25C:
+        - pdk_dir::libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x8_c2_bm_bist_typ_1p20V_25C.lib
+      nom_fast_1p32V_m40C:
+        - pdk_dir::libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x8_c2_bm_bist_fast_1p32V_m55C.lib
+      nom_slow_1p08V_125C:
+        - pdk_dir::libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x8_c2_bm_bist_slow_1p08V_125C.lib
+    instances:
+      sram:
+        location: [50, 50]
+        orientation: E
+
+PDN_MACRO_CONNECTIONS:
+  - "sram VPWR VGND VDD! VSS!"
+  - "sram VPWR VGND VDDARRAY! VSS!"
+
+PDN_CFG: dir::pdn_cfg.tcl
